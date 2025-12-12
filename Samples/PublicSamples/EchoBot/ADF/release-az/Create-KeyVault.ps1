@@ -18,7 +18,7 @@ $LocationLookup = Get-Content -Path $PSScriptRoot\..\bicep\global\region.json | 
 $Prefix = $LocationLookup.$Location.Prefix
 
 # Azure Blob Container Info
-[String]$KVName = "${Prefix}-${OrgName}-${App}-${Environment}-kv".tolower()
+[String]$KVName = "${Prefix}-${OrgName}-${App}-${Environment}-kv-1".tolower()
 [String]$RGName = "${Prefix}-${OrgName}-${App}-RG-${Environment}"
 
 
@@ -45,7 +45,8 @@ if (! (Get-AzKeyVault -Name $KVName -EA SilentlyContinue))
     {
         New-AzKeyVault -Name $KVName -ResourceGroupName $RGName -Location $Location `
             -EnabledForDeployment -EnabledForTemplateDeployment -EnablePurgeProtection:$EnablePurgeProtection `
-            -EnableRbacAuthorization -Sku Standard -ErrorAction Stop
+            -DisableRbacAuthorization:$false -Sku Standard -ErrorAction Stop
+
     }
     catch
     {
