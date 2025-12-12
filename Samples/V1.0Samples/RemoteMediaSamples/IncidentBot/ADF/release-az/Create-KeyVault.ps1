@@ -18,7 +18,7 @@ $LocationLookup = Get-Content -Path $PSScriptRoot\..\bicep\global\region.json | 
 $Prefix = $LocationLookup.$Location.Prefix
 
 # Azure Blob Container Info
-[String]$KVName = "${Prefix}-${OrgName}-${App}-${Environment}-kv-1".tolower()
+[String]$KVName = "${Prefix}-${OrgName}-${App}-${Environment}-kv".tolower()
 [String]$RGName = "${Prefix}-${OrgName}-${App}-RG-${Environment}"
 
 

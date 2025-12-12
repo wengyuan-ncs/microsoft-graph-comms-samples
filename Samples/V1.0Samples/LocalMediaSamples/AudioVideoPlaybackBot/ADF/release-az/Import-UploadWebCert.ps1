@@ -14,7 +14,7 @@ $LocationLookup = Get-Content -Path $PSScriptRoot\..\bicep\global\region.json | 
 $Prefix = $LocationLookup.$Location.Prefix
 
 # Azure Keyvault Info
-[String]$KVName = "${Prefix}-${OrgName}-${App}-${Environment}-kv-1".tolower()
+[String]$KVName = "${Prefix}-${OrgName}-${App}-${Environment}-kv".tolower()
 
 # TLS Cert
 Write-Verbose -Message "Primary KV Name:`t $KVName certificate]" -Verbose
