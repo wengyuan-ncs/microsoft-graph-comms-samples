@@ -73,6 +73,8 @@ namespace EchoBot.Bot
         public ICommunicationsClient Client { get; private set; }
 
 
+        private readonly CallApiService _callApiService;
+
         /// <summary>
         /// Dispose of the call client
         /// </summary>
@@ -93,12 +95,14 @@ namespace EchoBot.Bot
             IGraphLogger graphLogger,
             ILogger<BotService> logger,
             IOptions<AppSettings> settings,
-            IBotMediaLogger mediaLogger)
+            IBotMediaLogger mediaLogger,
+            CallApiService callApiService)
         {
             _graphLogger = graphLogger;
             _logger = logger;
             _settings = settings.Value;
             _mediaPlatformLogger = mediaLogger;
+            _callApiService = callApiService;
         }
 
         /// <summary>
@@ -318,7 +322,7 @@ namespace EchoBot.Bot
         {
             foreach (var call in args.AddedResources)
             {
-                var callHandler = new CallHandler(call, _settings, _logger);
+                var callHandler = new CallHandler(call, _settings, _logger, _callApiService);
                 var threadId = call.Resource.ChatInfo.ThreadId;
                 this.CallHandlers[threadId] = callHandler;
             }

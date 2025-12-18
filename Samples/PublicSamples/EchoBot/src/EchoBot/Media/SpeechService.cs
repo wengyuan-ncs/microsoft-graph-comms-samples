@@ -29,9 +29,11 @@ namespace EchoBot.Media
         private readonly SpeechConfig _speechConfig;
         private SpeechRecognizer _recognizer;
         private readonly SpeechSynthesizer _synthesizer;
+        private string _callId;
+        private readonly CallApiService _callApiService;
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeechService" /> class.
-        public SpeechService(AppSettings settings, ILogger logger)
+        public SpeechService(AppSettings settings, string callId, ILogger logger, CallApiService callApiService)
         {
             _logger = logger;
 
@@ -42,6 +44,8 @@ namespace EchoBot.Media
             var audioConfig = AudioConfig.FromStreamOutput(_audioOutputStream);
             _synthesizer = new SpeechSynthesizer(_speechConfig, audioConfig);
 
+            _callApiService = callApiService;
+            _callId = callId;
         }
 
         /// <summary>
@@ -143,22 +147,9 @@ namespace EchoBot.Media
                     _logger.LogInformation($"RECOGNIZING: Text={e.Result.Text}");
                 };
 
-                _recognizer.Recognized += async (s, e) =>
+                _recognizer.Recognized += (s, e) =>
                 {
-                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
-                    {
-                        if (string.IsNullOrEmpty(e.Result.Text))
-                            return;
-
-                        _logger.LogInformation($"RECOGNIZED: Text={e.Result.Text}");
-                        // We recognized the speech
-                        // Now do Speech to Text
-                        await TextToSpeech(e.Result.Text);
-                    }
-                    else if (e.Result.Reason == ResultReason.NoMatch)
-                    {
-                        _logger.LogInformation($"NOMATCH: Speech could not be recognized.");
-                    }
+                    _ = HandleRecognizedAsync(e);
                 };
 
                 _recognizer.Canceled += (s, e) =>
@@ -209,6 +200,30 @@ namespace EchoBot.Media
             }
 
             _isDraining = false;
+        }
+
+        private async Task HandleRecognizedAsync(SpeechRecognitionEventArgs e)
+        {
+            try
+            {
+                if (e.Result.Reason != ResultReason.RecognizedSpeech)
+                    return;
+
+                if (string.IsNullOrWhiteSpace(e.Result.Text))
+                    return;
+
+                var aiResponse = await _callApiService.CallAiApiAsync(
+                    e.Result.Text,
+                    _callId
+                );
+
+                if (!string.IsNullOrWhiteSpace(aiResponse))
+                    await TextToSpeech(aiResponse);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Speech recognition handler failed");
+            }
         }
 
         private async Task TextToSpeech(string text)

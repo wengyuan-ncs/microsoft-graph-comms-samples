@@ -51,6 +51,7 @@ namespace EchoBot.Bot
         private List<AudioMediaBuffer> audioMediaBuffers = new List<AudioMediaBuffer>();
         private int shutdown;
         private readonly SpeechService _languageService;
+        private readonly CallApiService _callApiService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BotMediaStream" /> class.
@@ -66,7 +67,8 @@ namespace EchoBot.Bot
             string callId,
             IGraphLogger graphLogger,
             ILogger logger,
-            AppSettings settings
+            AppSettings settings,
+            CallApiService callApiService
         )
             : base(graphLogger)
         {
@@ -76,6 +78,7 @@ namespace EchoBot.Bot
 
             _settings = settings;
             _logger = logger;
+            _callApiService = callApiService;
 
             this.participants = new List<IParticipant>();
 
@@ -97,7 +100,7 @@ namespace EchoBot.Bot
 
             if (_settings.UseSpeechService)
             {
-                _languageService = new SpeechService(_settings, _logger);
+                _languageService = new SpeechService(_settings, callId, _logger, _callApiService);
                 _languageService.SendMediaBuffer += this.OnSendMediaBuffer;
             }
         }

@@ -32,10 +32,14 @@ namespace EchoBot.Bot
         /// <param name="statefulCall">The stateful call.</param>
         /// <param name="settings">The settings.</param>
         /// <param name="logger"></param>
+        /// 
+
+        private readonly CallApiService _callApiService;
         public CallHandler(
             ICall statefulCall,
             AppSettings settings,
-            ILogger logger
+            ILogger logger,
+            CallApiService callApiService
         )
             : base(TimeSpan.FromMinutes(10), statefulCall?.GraphLogger)
         {
@@ -43,7 +47,8 @@ namespace EchoBot.Bot
             this.Call.OnUpdated += this.CallOnUpdated;
             this.Call.Participants.OnUpdated += this.ParticipantsOnUpdated;
 
-            this.BotMediaStream = new BotMediaStream(this.Call.GetLocalMediaSession(), this.Call.Id, this.GraphLogger, logger, settings);
+            _callApiService = callApiService;
+            this.BotMediaStream = new BotMediaStream(this.Call.GetLocalMediaSession(), this.Call.Id, this.GraphLogger, logger, settings, _callApiService);
         }
 
         /// <inheritdoc/>
