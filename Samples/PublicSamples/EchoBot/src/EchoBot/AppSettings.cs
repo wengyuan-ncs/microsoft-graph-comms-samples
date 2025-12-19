@@ -76,6 +76,13 @@ namespace EchoBot
         /// </summary>
         public string BotLanguage { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets the Speech Service Azure OpenAI endpoint
+        /// that it will use for geting AI responses
+        /// </summary>
+        public string AzureEndpoint { get; set; }
+
         // set by dsc script
 
         /// <summary>

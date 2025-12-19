@@ -31,6 +31,7 @@ namespace EchoBot.Media
         private readonly SpeechSynthesizer _synthesizer;
         private string _callId;
         private readonly CallApiService _callApiService;
+        private string _azureEndpoint;
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeechService" /> class.
         public SpeechService(AppSettings settings, string callId, ILogger logger, CallApiService callApiService)
@@ -40,6 +41,7 @@ namespace EchoBot.Media
             _speechConfig = SpeechConfig.FromSubscription(settings.SpeechConfigKey, settings.SpeechConfigRegion);
             _speechConfig.SpeechSynthesisLanguage = settings.BotLanguage;
             _speechConfig.SpeechRecognitionLanguage = settings.BotLanguage;
+            _azureEndpoint = settings.AzureEndpoint;
 
             var audioConfig = AudioConfig.FromStreamOutput(_audioOutputStream);
             _synthesizer = new SpeechSynthesizer(_speechConfig, audioConfig);
@@ -213,6 +215,7 @@ namespace EchoBot.Media
                     return;
 
                 var aiResponse = await _callApiService.CallAiApiAsync(
+                    _azureEndpoint,
                     e.Result.Text,
                     _callId
                 );

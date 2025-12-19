@@ -13,10 +13,8 @@ public class CallApiService
         _httpClient = httpClient;
     }
 
-    public async Task<string> CallAiApiAsync(string recognizedText, string sessionId)
+    public async Task<string> CallAiApiAsync(string url, string recognizedText, string sessionId)
     {
-        var url = "https://aida-fa-azureopenai-connector.azurewebsites.net/api/chat";
-
         var request = new ChatRequest
         {
             sessionId = sessionId,
