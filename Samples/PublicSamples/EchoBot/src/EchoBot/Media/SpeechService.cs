@@ -43,8 +43,6 @@ namespace EchoBot.Media
             _speechConfig.SpeechRecognitionLanguage = settings.BotLanguage;
             _azureEndpoint = settings.AzureEndpoint;
 
-            _logger.LogInformation("Azure Endpoint: ", _azureEndpoint.Substring(10));
-
             var audioConfig = AudioConfig.FromStreamOutput(_audioOutputStream);
             _synthesizer = new SpeechSynthesizer(_speechConfig, audioConfig);
 
@@ -213,6 +211,8 @@ namespace EchoBot.Media
                 if (e.Result.Reason != ResultReason.RecognizedSpeech)
                     return;
 
+                
+                _logger.LogError(_azureEndpoint, "Speech recognition handler failed");
                 if (string.IsNullOrWhiteSpace(e.Result.Text))
                     return;
 
