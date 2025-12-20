@@ -43,6 +43,8 @@ namespace EchoBot.Media
             _speechConfig.SpeechRecognitionLanguage = settings.BotLanguage;
             _azureEndpoint = settings.AzureEndpoint;
 
+            _logger.LogInformation("Azure Endpoint: ", _azureEndpoint.Substring(10));
+
             var audioConfig = AudioConfig.FromStreamOutput(_audioOutputStream);
             _synthesizer = new SpeechSynthesizer(_speechConfig, audioConfig);
 
