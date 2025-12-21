@@ -1,4 +1,4 @@
-name: .NET BOT D1 BUILD AIDABot
+name: .NET BOT D1 BUILD AIDA
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
       - 'main'
     paths:
       - './Samples/PublicSamples/EchoBot/src/**'
-      - .github/workflows/echobot-build-AIDABot.yml
+      - .github/workflows/echobot-build-AIDA.yml
 
   pull_request:
     branches:
       - 'main'
     paths:
       - './Samples/PublicSamples/EchoBot/src/**'
-      - .github/workflows/echobot-build-AIDABot.yml
+      - .github/workflows/echobot-build-AIDA.yml
 
   workflow_dispatch:
 
@@ -23,7 +23,7 @@ env:
   Component:   EchoBot
   BuildName:   0.1.${{ github.run_number }}
   Environment: D1
-  OrgName:     AIDABot
+  OrgName:     AIDA
   Location:    southeastasia
 
 jobs:
@@ -63,7 +63,7 @@ jobs:
     - name: Login via Az module
       uses: azure/login@v2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS_AIDABot_BOT }}
+        creds: ${{ secrets.AZURE_CREDENTIALS_AIDA_BOT }}
         enable-AzPSSession: true
 
     - name: G1_RG_UploadArtifacts_to_Blob
@@ -101,3 +101,6 @@ jobs:
           }
           & ./Samples/PublicSamples/EchoBot/ADF/release-az/Update-AzBuildMetaData.ps1 @Params
         azPSVersion: latest
+
+
+
