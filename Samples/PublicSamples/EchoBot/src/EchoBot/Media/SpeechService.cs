@@ -32,6 +32,8 @@ namespace EchoBot.Media
         private string _callId;
         private readonly CallApiService _callApiService;
         private string _azureEndpoint;
+        private string _elevenLabsEndpoint;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeechService" /> class.
         public SpeechService(AppSettings settings, string callId, ILogger logger, CallApiService callApiService)
@@ -42,6 +44,7 @@ namespace EchoBot.Media
             _speechConfig.SpeechSynthesisLanguage = settings.BotLanguage;
             _speechConfig.SpeechRecognitionLanguage = settings.BotLanguage;
             _azureEndpoint = settings.AzureEndpoint;
+            _elevenLabsEndpoint = settings.ElevenLabsEndpoint;
 
             var audioConfig = AudioConfig.FromStreamOutput(_audioOutputStream);
             _synthesizer = new SpeechSynthesizer(_speechConfig, audioConfig);
@@ -212,7 +215,6 @@ namespace EchoBot.Media
                     return;
 
                 
-                _logger.LogError(_azureEndpoint, "Speech recognition handler failed");
                 if (string.IsNullOrWhiteSpace(e.Result.Text))
                     return;
 
@@ -233,6 +235,7 @@ namespace EchoBot.Media
 
         private async Task TextToSpeech(string text)
         {
+            /* Old implementation using Azure speech synthesis directly
             // convert the text to speech
             SpeechSynthesisResult result = await _synthesizer.SpeakTextAsync(text);
             // take the stream of the result
@@ -247,6 +250,29 @@ namespace EchoBot.Media
                 };
                 OnSendMediaBufferEventArgs(this, args);
             }
+            */
+
+            /** New implementation using Azure Function to get PCM bytes **/
+            byte[] pcmBytes = await _callApiService.GetPcmFromAzureFunctionAsync(_elevenLabsEndpoint, text);
+
+            // 2️⃣ Convert PCM → AudioMediaBuffers (20 ms frames)
+            using var pcmStream = new MemoryStream(pcmBytes);
+
+            var currentTick = DateTime.Now.Ticks;
+
+            var audioBuffers = Util.Utilities.CreateAudioMediaBuffersFromPcm(
+                pcmStream,
+                currentTick,
+                _logger
+            );
+
+            MediaStreamEventArgs args = new MediaStreamEventArgs
+            {
+                AudioMediaBuffers = audioBuffers
+            };
+
+            // 3️⃣ Send to AudioSocket
+            OnSendMediaBufferEventArgs(this, args);
         }
     }
 }

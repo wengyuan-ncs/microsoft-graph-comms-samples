@@ -45,6 +45,38 @@ namespace EchoBot.Util
             return audioMediaBuffers;
         }
 
+        public static List<AudioMediaBuffer> CreateAudioMediaBuffersFromPcm(Stream pcmStream, long currentTick, ILogger logger)
+        {
+            var audioMediaBuffers = new List<AudioMediaBuffer>();
+            var referenceTime = currentTick;
+
+            // 20 ms @ 16 kHz mono, 16-bit = 640 bytes
+            const int bytesPerFrame = 640;
+            const long ticksPerFrame = 20 * 10_000;
+
+            byte[] buffer = new byte[bytesPerFrame];
+
+            while (pcmStream.Read(buffer, 0, bytesPerFrame) == bytesPerFrame)
+            {
+                IntPtr unmanagedBuffer = Marshal.AllocHGlobal(bytesPerFrame);
+                Marshal.Copy(buffer, 0, unmanagedBuffer, bytesPerFrame);
+
+                var audioBuffer = new AudioSendBuffer(
+                    unmanagedBuffer,
+                    bytesPerFrame,
+                    AudioFormat.Pcm16K,
+                    referenceTime
+                );
+
+                audioMediaBuffers.Add(audioBuffer);
+                referenceTime += ticksPerFrame;
+            }
+
+            logger.LogTrace($"Created {audioMediaBuffers.Count} PCM AudioMediaBuffers");
+            return audioMediaBuffers;
+        }
+
+
         public static List<AudioMediaBuffer> CreateAudioMediaBuffers(byte[] buffer, long currentTick, ILogger logger)
         {
             var audioMediaBuffers = new List<AudioMediaBuffer>();

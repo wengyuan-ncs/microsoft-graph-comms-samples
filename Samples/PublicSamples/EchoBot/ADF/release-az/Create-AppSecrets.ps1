@@ -62,6 +62,7 @@ $SpeechServicesSecrets = @(
     @{ Name = 'SpeechConfigRegion'; Message = 'Enter the Azure Region for your Speech Service (ie centralus, eastus2)'; },
     @{ Name = 'BotLanguage'; Message = 'Enter the language code you want your bot to understand and speak (ie en-US, es-MX, fr-FR)'; }
     @{ Name = 'AzureEndpoint'; Message = 'Enter Azure OpenAI foundry endpoint with function key'; }
+    @{ Name = 'ElevenLabsEndpoint'; Message = 'Enter ElevenLabs audio endpoint with function key'; }
 )
 
 Write-Warning -Message "There are [$($RequiredSecrets.count)] Secrets required, you can enter them now or cancel."

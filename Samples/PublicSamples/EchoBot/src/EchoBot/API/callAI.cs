@@ -32,6 +32,25 @@ public class CallApiService
 
         return aiResponse?.response ?? string.Empty;
     }
+
+    public async Task<byte[]> GetPcmFromAzureFunctionAsync(
+        string url,
+        string text)
+    {
+        var payload = new
+        {
+            message = text
+        };
+
+        var json = JsonSerializer.Serialize(payload);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        using var response = await _httpClient.PostAsync(url, content);
+        response.EnsureSuccessStatusCode();
+
+        // IMPORTANT: Return raw PCM bytes
+        return await response.Content.ReadAsByteArrayAsync();
+    }
 }
 
 

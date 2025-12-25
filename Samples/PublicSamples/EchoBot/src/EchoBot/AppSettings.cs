@@ -83,6 +83,13 @@ namespace EchoBot
         /// </summary>
         public string AzureEndpoint { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets the Speech Service ElevenLabs audio endpoint
+        /// that it will use for converting message to natural audio voice
+        /// </summary>
+        public string ElevenLabsEndpoint { get; set; }
+
         // set by dsc script
 
         /// <summary>
