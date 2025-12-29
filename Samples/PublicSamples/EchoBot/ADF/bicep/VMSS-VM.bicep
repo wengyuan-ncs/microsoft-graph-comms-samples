@@ -375,7 +375,7 @@ resource VMSS 'Microsoft.Compute/virtualMachineScaleSets@2021-07-01' = {
               type: 'DSC'
               typeHandlerVersion: '2.24'
               autoUpgradeMinorVersion: true
-              forceUpdateTag: deploymentTime
+              forceUpdateTag: '1.2'
               settings: {
                 wmfVersion: 'latest'
                 configuration: {

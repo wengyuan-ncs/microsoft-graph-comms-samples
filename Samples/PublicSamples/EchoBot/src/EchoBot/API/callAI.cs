@@ -30,7 +30,7 @@ public class CallApiService
         var responseJson = await response.Content.ReadAsStringAsync();
         var aiResponse = JsonSerializer.Deserialize<ChatResponse>(responseJson);
 
-        return aiResponse?.response ?? string.Empty;
+        return aiResponse?.response?.Trim('"') ?? string.Empty;
     }
 
     public async Task<byte[]> GetPcmFromAzureFunctionAsync(
