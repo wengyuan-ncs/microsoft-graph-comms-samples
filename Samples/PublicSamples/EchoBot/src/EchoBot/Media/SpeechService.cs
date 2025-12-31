@@ -34,6 +34,11 @@ namespace EchoBot.Media
         private string _azureEndpoint;
         private string _elevenLabsEndpoint;
 
+        private static readonly HashSet<string> FillerWords = new()
+        {
+            "um", "uh", "eh", "hmm", "mm", "yeah", "no", "uhh", "mmm", "ah", "like", "yes", "so"
+        };
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeechService" /> class.
@@ -93,6 +98,7 @@ namespace EchoBot.Media
         }
 
         public event EventHandler<MediaStreamEventArgs> SendMediaBuffer;
+        public event EventHandler<string> BargeInRequested;
 
         /// <summary>
         /// Ends this instance.
@@ -151,6 +157,21 @@ namespace EchoBot.Media
                 _recognizer.Recognizing += (s, e) =>
                 {
                     _logger.LogError($"RECOGNIZING: Text={e.Result.Text}");
+                    var text = e.Result.Text?.Trim().ToLowerInvariant();
+
+                    if (string.IsNullOrWhiteSpace(text))
+                        return;
+
+                    // break into words
+                    var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    // check if there is any non-filler word
+                    bool hasMeaningful = words.Any(w => !FillerWords.Contains(w));
+
+                    if (hasMeaningful)
+                    {
+                        BargeInRequested?.Invoke(this, text);
+                    }
                 };
 
                 _recognizer.Recognized += (s, e) =>
