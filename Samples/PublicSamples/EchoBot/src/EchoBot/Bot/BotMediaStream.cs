@@ -53,6 +53,9 @@ namespace EchoBot.Bot
         private readonly SpeechService _languageService;
         private readonly CallApiService _callApiService;
 
+
+        private CancellationTokenSource _ttsPlaybackCts = new();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BotMediaStream" /> class.
         /// </summary>
@@ -101,7 +104,13 @@ namespace EchoBot.Bot
             if (_settings.UseSpeechService)
             {
                 _languageService = new SpeechService(_settings, callId, _logger, _callApiService);
-                _languageService.SendMediaBuffer += this.OnSendMediaBuffer;
+                //_languageService.SendMediaBuffer += this.OnSendMediaBuffer;
+                _languageService.SendMediaBuffer += this.OnSpeechServiceSendMediaBuffer;
+
+                _languageService.BargeInRequested += (sender, partialText) =>
+                {
+                    ResetPlaybackCancellation();
+                };
             }
         }
 
@@ -149,6 +158,8 @@ namespace EchoBot.Bot
             _logger.LogInformation($"disposed {this.audioMediaBuffers.Count} audioMediaBUffers.");
 
             this.audioMediaBuffers.Clear();
+
+            this._ttsPlaybackCts?.Cancel();
         }
 
         /// <summary>
@@ -246,6 +257,51 @@ namespace EchoBot.Bot
         {
             this.audioMediaBuffers = e.AudioMediaBuffers;
             var result = Task.Run(async () => await this.audioVideoFramePlayer.EnqueueBuffersAsync(this.audioMediaBuffers, new List<VideoMediaBuffer>())).GetAwaiter();
+        }
+
+
+        // Handler invoked when SpeechService emits TTS buffers
+        private void OnSpeechServiceSendMediaBuffer(object? sender, Media.MediaStreamEventArgs e)
+        {
+            // Cancel previous playback
+            this._ttsPlaybackCts?.Cancel();
+
+            // New cancellation token for this TTS turn
+            this._ttsPlaybackCts = new CancellationTokenSource();
+
+            // Begin interruptible playback
+            _ = PlayBuffersInterruptibleAsync(e.AudioMediaBuffers, this._ttsPlaybackCts.Token)
+                .ForgetAndLogExceptionAsync(GraphLogger, "Error during interruptible playback");
+        }
+
+        // Interruptible playback implementation
+        private async Task PlayBuffersInterruptibleAsync(List<AudioMediaBuffer> buffers, CancellationToken token)
+        {
+            await this.startVideoPlayerCompleted.Task.ConfigureAwait(false);
+
+            const int frameDurationMs = 20;
+
+            foreach (var buffer in buffers)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                await this.audioVideoFramePlayer.EnqueueBuffersAsync(
+                    new List<AudioMediaBuffer> { buffer },
+                    new List<VideoMediaBuffer>());
+
+                await Task.Delay(frameDurationMs, token);
+            }
+        }
+
+        // Allows manual cancellation of current TTS playback (barge-in)
+        public void ResetPlaybackCancellation()
+        {
+            this._ttsPlaybackCts?.Cancel();
+            this._ttsPlaybackCts?.Dispose();
+            this._ttsPlaybackCts = new CancellationTokenSource();
         }
     }
 }
