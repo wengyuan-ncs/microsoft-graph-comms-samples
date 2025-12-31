@@ -170,7 +170,8 @@ namespace EchoBot.Media
 
                     if (hasMeaningful)
                     {
-                        BargeInRequested?.Invoke(this, text);
+                        _logger.LogError($"RECOGNIZING: Text={e.Result.Text}");
+                        //BargeInRequested?.Invoke(this, text);
                     }
                 };
 

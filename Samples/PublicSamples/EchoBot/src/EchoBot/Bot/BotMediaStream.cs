@@ -285,6 +285,7 @@ namespace EchoBot.Bot
             {
                 if (token.IsCancellationRequested)
                 {
+                    buffer.Dispose();
                     break;
                 }
 
