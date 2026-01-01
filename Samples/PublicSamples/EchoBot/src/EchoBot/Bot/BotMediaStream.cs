@@ -104,8 +104,8 @@ namespace EchoBot.Bot
             if (_settings.UseSpeechService)
             {
                 _languageService = new SpeechService(_settings, callId, _logger, _callApiService);
-                //_languageService.SendMediaBuffer += this.OnSendMediaBuffer;
-                _languageService.SendMediaBuffer += this.OnSpeechServiceSendMediaBuffer;
+                _languageService.SendMediaBuffer += this.OnSendMediaBuffer;
+                //_languageService.SendMediaBuffer += this.OnSpeechServiceSendMediaBuffer;
 
                 _languageService.BargeInRequested += (sender, partialText) =>
                 {

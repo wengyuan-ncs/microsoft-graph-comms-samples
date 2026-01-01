@@ -156,7 +156,8 @@ namespace EchoBot.Media
 
                 _recognizer.Recognizing += (s, e) =>
                 {
-                    _logger.LogInformation($"RECOGNIZING: Text={e.Result.Text}");
+                    _logger.LogError($"RECOGNIZING: Text={e.Result.Text}");
+                    /*
                     var text = e.Result.Text?.Trim().ToLowerInvariant();
 
                     if (string.IsNullOrWhiteSpace(text))
@@ -173,6 +174,7 @@ namespace EchoBot.Media
                         _logger.LogError($"RECOGNIZING: Text={e.Result.Text}");
                         //BargeInRequested?.Invoke(this, text);
                     }
+                    */
                 };
 
                 _recognizer.Recognized += (s, e) =>
