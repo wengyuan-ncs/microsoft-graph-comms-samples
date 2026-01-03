@@ -103,8 +103,8 @@ namespace EchoBot.Bot
             if (_settings.UseSpeechService)
             {
                 _languageService = new SpeechService(_settings, callId, _logger, _callApiService);
-                //_languageService.SendMediaBuffer += this.OnSendMediaBuffer;
-                _languageService.SendMediaBuffer += this.OnSpeechServiceSendMediaBuffer;
+                _languageService.SendMediaBuffer += this.OnSendMediaBuffer;
+               // _languageService.SendMediaBuffer += this.OnSpeechServiceSendMediaBuffer;
 
                 _languageService.BargeInRequested += (sender, partialText) =>
                 {
@@ -299,6 +299,8 @@ namespace EchoBot.Bot
         public void ResetPlaybackCancellation()
         {
             this._ttsPlaybackCts?.Cancel();
+
+            this.audioVideoFramePlayer?.ClearAsync(clearAudio: true, null).ForgetAndLogExceptionAsync(GraphLogger, "Error clear player audio/video");
             this._ttsPlaybackCts?.Dispose();
             this._ttsPlaybackCts = new CancellationTokenSource();
         }
